@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title></title>
+		<style>
+			body {
+				position: fixed;
+				margin: 0;
+				padding: 0;
+			}
+			#graph {
+				position: relative;
+				height: 100vw;
+				width: auto;
+				border: 1px solid red;
+			}
+		</style>
+	</head>
+	<body>
+		<canvas id='graph' width='500' height="500"></canvas>
+		<script type="text/javascript" src='vector.js'></script>
+		<script type="text/javascript" src='matrix.js'></script>
+		<script type="text/javascript" src='functionDrawer.js'></script>
+		<script type="text/javascript" src='perceptron.js'></script>
+
+		<script>
+		
+			// let actualFunction = (x) => 2 * x;
+			let actualFunction = (x) => .5 * x + .1;
+
+			let perceptron = new Perceptron();
+
+
+
+			let m = new Matrix(5, 1, 2);
+
+
+
+			
+			const steps = 10;
+			const learningRate = .1;
+
+			function tune() {
+				let sumdB = 0;
+				let sumdW = 0;
+				for (let x = 0; x < 1; x += 1 / steps)
+				{	
+					let changes = perceptron.calcChanges(x, actualFunction(x));
+					sumdW += changes.dW;
+					sumdB += changes.dB;
+				}
+
+				let dW = sumdW / steps * learningRate;
+				let dB = sumdB / steps * learningRate;
+
+				perceptron.bias -= dB;
+				perceptron.weight -= dW;
+
+			}
+
+			function train(_rounds = 100) {
+				let startError = calcAverageError(steps);
+				for (let i = 0; i < _rounds; i++) tune();
+				console.log('start: ' + startError, 'end: ' + calcAverageError(steps));
+			}
+
+
+
+
+			function calcAverageError(_steps = 10) {
+				let sumError = 0;
+				for (let x = 0; x < 1; x += 1 / _steps)
+				{	
+					sumError += perceptron.calcChanges(x, actualFunction(x)).error;
+				}
+
+				return sumError / _steps;
+			}
+
+
+			
+
+
+
+
+
+			f = (x, y) => perceptron.calcActivation(x) > y;
+
+
+
+
+
+
+
+
+
+			// const a = .5;
+			// const b = .3;
+			// f = (x, y) => a * x + b > y;
+			// f = (x, y) => (x - .5)**2 + (y - .5)**2 < .2**2;
+			// f = (x, y) => Math.sin(x * Math.PI * 5) / 4 + .5 > y;
+		
+
+
+			let FD = new FunctionDrawer(graph);
+			const xDomain = new Vector(0, 1);
+			const yDomain = new Vector(0, 1);
+			FD.setDomain(xDomain, yDomain);
+			
+			i = setInterval(() => FD.drawFunction(f), 50);
+		</script>
+	</body>
+</html>
