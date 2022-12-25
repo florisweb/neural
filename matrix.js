@@ -15,7 +15,14 @@ class Matrix {
 	}
 	setFromMatrix(_matrix) {
 		this.value = Object.assign([], _matrix.value);
+		return this;
 	}
+
+	fromArray(_array) {
+		this.value = Object.assign([], _array);
+		return this;
+	}
+
 
 
 	copy() {
@@ -73,27 +80,44 @@ class Matrix {
 	}
 
 
+	// multiply(_matrix) {
+	// 	// if (this.width !== _matrix.height || this.height)
+	// 	let newMatrix = new Matrix(_matrix.width, this.height);
+	// 	console.log('size', _matrix.width, this.height);
+
+	// 	for (let y = 0; y < newMatrix.height; y++)
+	// 	{	
+	// 		for (let x = 0; x < newMatrix.width; x++)
+	// 		{
+	// 			console.log(x, y);
+	// 			newMatrix.value[y][x] = this.value[y].map(v => v * _matrix.value[y][x])
+	// 									.reduce((total, value) => total + value); // sums the array
+
+
+	// 		}
+	// 	}
+	// 	this.setFromMatrix(newMatrix);
+	// 	return this; 
+	// }
+
+
 	multiply(_matrix) {
 		// if (this.width !== _matrix.height || this.height)
-		let newMatrix = new Matrix(_matrix.width, this.height);
+		let newMatrix = new Matrix(_matrix.width, this.height, 0); // size correct
 
 		for (let y = 0; y < newMatrix.height; y++)
 		{	
 			for (let x = 0; x < newMatrix.width; x++)
 			{
-
-				newMatrix.value[y][x] = this.value[y].map(v => v * _matrix.value[y][x])
-										.reduce((total, value) => total + value); // sums the array
-
-
+				for (let k = 0; k < this.width; k++)
+				{
+					newMatrix.value[y][x] += this.value[y][k] * _matrix.value[k][x];
+				}
 			}
 		}
 		this.setFromMatrix(newMatrix);
 		return this; 
 	}
-	
-
-
 
 }
 
