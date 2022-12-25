@@ -19,6 +19,40 @@ class NeuralNetwork {
 		this.layers[0].setActivation(_input);
 		return this.layers[this.layers.length - 1].activation;
 	}
+
+	calcChanges(_input, _targetOutput) {
+		const learningRate = .1;
+
+		let output = this.calcOutput(_input);
+		let errors = output.copy().add(_targetOutput.copy().scale(-1)).applyFunction((v) => v**2);
+		let totalError = errors.value.map(r => r[0]).reduce((sum, val) => sum += val);
+		console.log(totalError);
+
+		let curActivationError = errors.copy();
+		let layerChanges = [];
+		for (let l = this.layers.length - 1; l > 0; l--)
+		{
+			let nextLayerActivationError = this.layers[l].weights.copy().transpose().multiply(curActivationError);
+			
+			let layer = this.layers[l].copyShape();
+			layer.biases = curActivationError.copy().scale(-learningRate);
+			layer.weights = curActivationError.copy().multiply(nextLayerActivationError.copy().transpose());
+
+			curActivationError = nextLayerActivationError;
+			layerChanges[l] = layer;
+		}
+
+		return layerChanges;
+	}
+
+
+	applyChanges(_layerChanges) {
+		for (let l = 1; l < _layerChanges.length; l++)
+		{
+			this.layers[l].biases.add(_layerChanges[l].biases);
+			this.layers[l].weights.add(_layerChanges[l].weights);
+		}
+	}
 }
 
 
@@ -40,6 +74,10 @@ class Layer {
 
 	get activation() {
 		return this.weights.copy().multiply(this.#prevLayer.activation).add(this.biases);
+	}
+
+	copyShape() {
+		return new Layer(this.size, this.#prevLayer);
 	}
 }
 

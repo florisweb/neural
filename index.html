@@ -30,19 +30,53 @@
 		
 			
 
-			let NN = new NeuralNetwork([3, 50, 100, 2, 5]);
+
+
+			let NN = new NeuralNetwork([2, 1]);
+
+			let dataPoints = [];
+			let f = (x, y) => NN.calcOutput(new Matrix().fromArray([[x], [y]])).value[0][0] > .5;
 
 
 
 
 
 
+			function train() {
+				if (!dataPoints.length) return;
+
+				let summedChanges;
+
+				for (let point of dataPoints)
+				{
+					let changes = NN.calcChanges(point.inputs, point.outputs);;
+					if (!summedChanges) 
+					{
+						summedChanges = changes;
+						continue;
+					}
+
+					for (let l = 1; l < changes.length; l++)
+					{
+						summedChanges[l].weights.add(changes[l].weights);
+						summedChanges[l].biases.add(changes[l].biases);
+					}
+				}
+
+				for (let l = 1; l < summedChanges.length; l++)
+				{
+					summedChanges[l].weights.scale(1 / dataPoints.length * .1);
+					summedChanges[l].biases.scale(1 / dataPoints.length * .1);
+				}
+
+				NN.applyChanges(summedChanges);
+
+			}
 
 
 
 
-
-
+			setInterval(() => train(), 50);
 
 
 
@@ -53,56 +87,56 @@
 
 
 			// let actualFunction = (x) => 2 * x;
-			let actualFunction = (x) => .5 * x + .1;
+			// let actualFunction = (x) => .5 * x + .1;
 
-			let perceptron = new Perceptron();
+			// let perceptron = new Perceptron();
 
 
 
-			let m = new Matrix(5, 1, 2);
+			// let m = new Matrix(5, 1, 2);
 
 
 
 			
-			const steps = 10;
-			const learningRate = .1;
+			// const steps = 10;
+			// const learningRate = .1;
 
-			function tune() {
-				let sumdB = 0;
-				let sumdW = 0;
-				for (let x = 0; x < 1; x += 1 / steps)
-				{	
-					let changes = perceptron.calcChanges(x, actualFunction(x));
-					sumdW += changes.dW;
-					sumdB += changes.dB;
-				}
+			// function tune() {
+			// 	let sumdB = 0;
+			// 	let sumdW = 0;
+			// 	for (let x = 0; x < 1; x += 1 / steps)
+			// 	{	
+			// 		let changes = perceptron.calcChanges(x, actualFunction(x));
+			// 		sumdW += changes.dW;
+			// 		sumdB += changes.dB;
+			// 	}
 
-				let dW = sumdW / steps * learningRate;
-				let dB = sumdB / steps * learningRate;
+			// 	let dW = sumdW / steps * learningRate;
+			// 	let dB = sumdB / steps * learningRate;
 
-				perceptron.bias -= dB;
-				perceptron.weight -= dW;
+			// 	perceptron.bias -= dB;
+			// 	perceptron.weight -= dW;
 
-			}
+			// }
 
-			function train(_rounds = 100) {
-				let startError = calcAverageError(steps);
-				for (let i = 0; i < _rounds; i++) tune();
-				console.log('start: ' + startError, 'end: ' + calcAverageError(steps));
-			}
-
-
+			// function train(_rounds = 100) {
+			// 	let startError = calcAverageError(steps);
+			// 	for (let i = 0; i < _rounds; i++) tune();
+			// 	console.log('start: ' + startError, 'end: ' + calcAverageError(steps));
+			// }
 
 
-			function calcAverageError(_steps = 10) {
-				let sumError = 0;
-				for (let x = 0; x < 1; x += 1 / _steps)
-				{	
-					sumError += perceptron.calcChanges(x, actualFunction(x)).error;
-				}
 
-				return sumError / _steps;
-			}
+
+			// function calcAverageError(_steps = 10) {
+			// 	let sumError = 0;
+			// 	for (let x = 0; x < 1; x += 1 / _steps)
+			// 	{	
+			// 		sumError += perceptron.calcChanges(x, actualFunction(x)).error;
+			// 	}
+
+			// 	return sumError / _steps;
+			// }
 
 
 			
@@ -111,7 +145,7 @@
 
 
 
-			f = (x, y) => perceptron.calcActivation(x) > y;
+			// f = (x, y) => perceptron.calcActivation(x) > y;
 
 
 
@@ -134,6 +168,24 @@
 			const yDomain = new Vector(0, 1);
 			FD.setDomain(xDomain, yDomain);
 			
+
+
+
+			graph.onclick = function(_e) {
+				console.log(_e);
+				let pos = FD.pxToPos(new Vector(_e.clientX / graph.offsetWidth * graph.width, _e.clientY / graph.offsetHeight * graph.height));
+				console.log(pos);
+				let dataPoint = {
+					inputs: new Matrix().fromArray([pos.value]).transpose(),
+					outputs: new Matrix().fromArray([[_e.shiftKey ? .6 : .4]])
+				}
+				dataPoints.push(dataPoint);
+			}
+			
+
+
+
+
 			i = setInterval(() => FD.drawFunction(f), 50);
 		</script>
 	</body>

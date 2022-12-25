@@ -75,7 +75,7 @@ class Matrix {
 		return this;
 	}
 
-	elementWiseMultiplication(_factor) {
+	scale(_factor) {
 		return this.applyFunction((_v) => _v * _factor);
 	}
 
