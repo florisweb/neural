@@ -46,37 +46,48 @@
 				if (!dataPoints.length) return;
 
 				let summedChanges;
+				let summedError = 0;
 
 				for (let point of dataPoints)
 				{
-					let changes = NN.calcChanges(point.inputs, point.outputs);;
+					let changeSet = NN.calcChanges(point.inputs, point.outputs);
+					summedError += changeSet.error;
 					if (!summedChanges) 
 					{
-						summedChanges = changes;
+						summedChanges = changeSet.changes;
 						continue;
 					}
 
-					for (let l = 1; l < changes.length; l++)
+					for (let l = 1; l < changeSet.changes.length; l++)
 					{
-						summedChanges[l].weights.add(changes[l].weights);
-						summedChanges[l].biases.add(changes[l].biases);
+						summedChanges[l].weights.add(changeSet.changes[l].weights);
+						summedChanges[l].biases.add(changeSet.changes[l].biases);
 					}
 				}
 
 				for (let l = 1; l < summedChanges.length; l++)
 				{
-					summedChanges[l].weights.scale(1 / dataPoints.length * .1);
-					summedChanges[l].biases.scale(1 / dataPoints.length * .1);
+					summedChanges[l].weights.scale(1 / dataPoints.length);
+					summedChanges[l].biases.scale(1 / dataPoints.length);
 				}
 
 				NN.applyChanges(summedChanges);
+			}
 
+			function calcError() {
+				let summedError = 0;
+
+				for (let point of dataPoints)
+				{
+					summedError += NN.calcTotalError(point.inputs, point.outputs);
+				}
+				return summedError / dataPoints.length;
 			}
 
 
 
 
-			setInterval(() => train(), 50);
+			// setInterval(() => train(), 50);
 
 
 
@@ -177,7 +188,7 @@
 				console.log(pos);
 				let dataPoint = {
 					inputs: new Matrix().fromArray([pos.value]).transpose(),
-					outputs: new Matrix().fromArray([[_e.shiftKey ? .6 : .4]])
+					outputs: new Matrix().fromArray([[_e.shiftKey ? -1 : 1]])
 				}
 				dataPoints.push(dataPoint);
 			}
@@ -186,7 +197,13 @@
 
 
 
-			i = setInterval(() => FD.drawFunction(f), 50);
+			i = setInterval(() => {
+				FD.drawFunction(f);
+				for (let point of dataPoints) 
+				{
+					FD.drawPoint(new Vector(...point.inputs.copy().transpose().value[0]), point.outputs.value[0][0] > 0 ? '#0f0' : '#f0f', 10);
+				}
+			}, 50);
 		</script>
 	</body>
 </html>

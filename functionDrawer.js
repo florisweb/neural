@@ -57,15 +57,15 @@ class FunctionDrawer {
 
 
 
-	drawPoint(_pos, _color = '#f00') {
+	drawPoint(_pos, _color = '#f00', _size = 2) {
 		let pxPos = this.posToPx(_pos);
 		this.#ctx.fillStyle = _color;
-		const size = 2;
+
 		this.#ctx.fillRect(
-			pxPos.value[0] - size / 2,
-			pxPos.value[1] - size / 2,
-			size,
-			size
+			pxPos.value[0] - _size / 2,
+			pxPos.value[1] - _size / 2,
+			_size,
+			_size
 		);
 	}
 
