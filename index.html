@@ -32,65 +32,22 @@
 		<script>
 		
 			
-
-
-
 			let NN = new NeuralNetwork([2, 9, 5, 1]);
-
 			let dataPoints = [];
 
 
 
 
-
-
-			function train() {
-				if (!dataPoints.length) return;
-
-				let summedChanges;
-				let summedError = 0;
-
-				for (let point of dataPoints)
-				{
-					let changeSet = NN.calcChanges(point.inputs, point.outputs);
-					summedError += changeSet.error;
-					if (!summedChanges) 
-					{
-						summedChanges = changeSet.changes;
-						continue;
-					}
-
-					for (let l = 1; l < changeSet.changes.length; l++)
-					{
-						summedChanges[l].weights.add(changeSet.changes[l].weights);
-						summedChanges[l].biases.add(changeSet.changes[l].biases);
-					}
-				}
-
-				for (let l = 1; l < summedChanges.length; l++)
-				{
-					summedChanges[l].weights.scale(1 / dataPoints.length);
-					summedChanges[l].biases.scale(1 / dataPoints.length);
-				}
-
-				NN.applyChanges(summedChanges);
-			}
-
-			function calcError() {
-				let summedError = 0;
-
-				for (let point of dataPoints)
-				{
-					summedError += NN.calcTotalError(point.inputs, point.outputs);
-				}
-				return summedError / dataPoints.length;
-			}
-
-
 			let trainSpeed = 100;
 			function runner() {
 				let start = new Date();
-				for (let i = 0; i < trainSpeed; i++) train();
+				for (let i = 0; i < trainSpeed; i++) NN.trainSet(dataPoints);
+
+				let dT = new Date() - start;
+				let msPerRound = dT / trainSpeed;
+				const targetMSPerRound = 16;
+				trainSpeed = targetMSPerRound / msPerRound;
+
 				
 				FD.drawFunction(f);
 				for (let point of dataPoints) 
@@ -99,7 +56,7 @@
 					FD.drawPoint(new Vector(point.inputs.value[0][0], point.inputs.value[1][0]), point.outputs.value[0][0] > .5 ? '#f0f' : '#0f0', 10)
 				}
 
-				errorHolder.innerHTML = 'Error: ' + calcError() + ' dT: ' + (new Date() - start) + 'ms';
+				errorHolder.innerHTML = 'Error: ' + NN.calcSetError(dataPoints) + ' dT: ' + dT + 'ms dT-total: ' + (new Date() - start) + 'ms | Rounds: ' + trainSpeed;
 
 				requestAnimationFrame(runner);
 			}
@@ -217,11 +174,32 @@
 			
 
 
+			dataPoints = JSON.parse("[{\"i\":[[0.2896969696969697],[0.3284848484848485]],\"a\":[[1]]},{\"i\":[[0.28],[0.6545454545454545]],\"a\":[[0]]},{\"i\":[[0.6824242424242424],[0.31636363636363635]],\"a\":[[0]]},{\"i\":[[0.6703030303030303],[0.6509090909090909]],\"a\":[[1]]},{\"i\":[[0.4763636363636364],[0.48727272727272725]],\"a\":[[1]]},{\"i\":[[0.38545454545454544],[0.40969696969696967]],\"a\":[[1]]},{\"i\":[[0.43757575757575756],[0.45212121212121215]],\"a\":[[0]]}]").map(o => {return {inputs: new Matrix(1, 1).fromArray(o.i), outputs: new Matrix().fromArray(o.a) }})
+
+
+
+
+
+
+
+			// Start: 2404, 2709, 2793
+			// After caching z and activation: 1380, 1447, 1433
+
 
 
 
 
 			runner();
+			// let start = new Date();
+			// for (let i = 0; i < 20000; i++) NN.trainSet(dataPoints);
+			// errorHolder.innerHTML = 'Error: ' + NN.calcSetError(dataPoints) + ' dT: ' + (new Date() - start) + 'ms';
+
+			// FD.drawFunction(f);
+			// for (let point of dataPoints) 
+			// {
+			// 	// FD.drawPoint(new Vector(point.inputs.value[0][0], point.outputs.value[0][0]), '#f0f', 10)
+			// 	FD.drawPoint(new Vector(point.inputs.value[0][0], point.inputs.value[1][0]), point.outputs.value[0][0] > .5 ? '#f0f' : '#0f0', 10)
+			// }
 		</script>
 	</body>
 </html>
