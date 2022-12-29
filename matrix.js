@@ -87,26 +87,9 @@ class Matrix {
 	}
 
 
-	// multiply(_matrix) {
-	// 	// if (this.width !== _matrix.height || this.height)
-	// 	let newMatrix = new Matrix(_matrix.width, this.height);
-	// 	console.log('size', _matrix.width, this.height);
-
-	// 	for (let y = 0; y < newMatrix.height; y++)
-	// 	{	
-	// 		for (let x = 0; x < newMatrix.width; x++)
-	// 		{
-	// 			console.log(x, y);
-	// 			newMatrix.value[y][x] = this.value[y].map(v => v * _matrix.value[y][x])
-	// 									.reduce((total, value) => total + value); // sums the array
-
-
-	// 		}
-	// 	}
-	// 	this.setFromMatrix(newMatrix);
-	// 	return this; 
-	// }
-
+	elementWiseMultiply(_matrix) {
+		return this.applyFunction((v, x, y) => v * _matrix.value[y][x]);
+	}
 
 	multiply(_matrix) {
 		// if (this.width !== _matrix.height || this.height)

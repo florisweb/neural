@@ -13,13 +13,16 @@
 			#graph {
 				position: relative;
 				height: 100vw;
+				max-height: 100vh;
 				width: auto;
 				border: 1px solid red;
+				margin-bottom: -40px;
 			}
 		</style>
 	</head>
 	<body>
 		<canvas id='graph' width='500' height="500"></canvas>
+		<div id='errorHolder'></div>
 		<script type="text/javascript" src='vector.js'></script>
 		<script type="text/javascript" src='matrix.js'></script>
 		<script type="text/javascript" src='functionDrawer.js'></script>
@@ -32,10 +35,9 @@
 
 
 
-			let NN = new NeuralNetwork([2, 1]);
+			let NN = new NeuralNetwork([1, 5, 3, 1]);
 
 			let dataPoints = [];
-			let f = (x, y) => NN.calcOutput(new Matrix().fromArray([[x], [y]])).value[0][0] > .5;
 
 
 
@@ -86,8 +88,20 @@
 
 
 
+			function runner() {
+				let start = new Date();
+				for (let i = 0; i < 3000; i++) train();
+				
+				FD.drawFunction(f);
+				for (let point of dataPoints) 
+				{
+					FD.drawPoint(new Vector(point.inputs.value[0][0], point.outputs.value[0][0]), '#f0f', 10)
+				}
 
-			// setInterval(() => train(), 50);
+				errorHolder.innerHTML = 'Error: ' + calcError() + ' dT: ' + (new Date() - start) + 'ms';
+
+				requestAnimationFrame(runner);
+			}
 
 
 
@@ -173,6 +187,10 @@
 			// f = (x, y) => Math.sin(x * Math.PI * 5) / 4 + .5 > y;
 		
 
+			// let f = (x, y) => NN.calcOutput(new Matrix().fromArray([[x], [y]])).value[0][0] > .5;
+			let f = (x, y) => NN.calcOutput(new Matrix().fromArray([[x]])).value[0][0] > y;
+
+
 
 			let FD = new FunctionDrawer(graph);
 			const xDomain = new Vector(0, 1);
@@ -183,12 +201,15 @@
 
 
 			graph.onclick = function(_e) {
-				console.log(_e);
 				let pos = FD.pxToPos(new Vector(_e.clientX / graph.offsetWidth * graph.width, _e.clientY / graph.offsetHeight * graph.height));
-				console.log(pos);
+				// let dataPoint = {
+				// 	inputs: new Matrix().fromArray([pos.value]).transpose(),
+				// 	outputs: new Matrix().fromArray([[_e.shiftKey ? 0 : 1]])
+				// }
+
 				let dataPoint = {
-					inputs: new Matrix().fromArray([pos.value]).transpose(),
-					outputs: new Matrix().fromArray([[_e.shiftKey ? -1 : 1]])
+					inputs: new Matrix().fromArray([[pos.value[0]]]),
+					outputs: new Matrix().fromArray([[pos.value[1]]])
 				}
 				dataPoints.push(dataPoint);
 			}
@@ -197,13 +218,9 @@
 
 
 
-			i = setInterval(() => {
-				FD.drawFunction(f);
-				for (let point of dataPoints) 
-				{
-					FD.drawPoint(new Vector(...point.inputs.copy().transpose().value[0]), point.outputs.value[0][0] > 0 ? '#0f0' : '#f0f', 10);
-				}
-			}, 50);
+
+
+			runner();
 		</script>
 	</body>
 </html>
