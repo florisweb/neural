@@ -35,7 +35,7 @@
 
 
 
-			let NN = new NeuralNetwork([1, 5, 3, 1]);
+			let NN = new NeuralNetwork([2, 9, 5, 1]);
 
 			let dataPoints = [];
 
@@ -87,15 +87,16 @@
 			}
 
 
-
+			let trainSpeed = 100;
 			function runner() {
 				let start = new Date();
-				for (let i = 0; i < 3000; i++) train();
+				for (let i = 0; i < trainSpeed; i++) train();
 				
 				FD.drawFunction(f);
 				for (let point of dataPoints) 
 				{
-					FD.drawPoint(new Vector(point.inputs.value[0][0], point.outputs.value[0][0]), '#f0f', 10)
+					// FD.drawPoint(new Vector(point.inputs.value[0][0], point.outputs.value[0][0]), '#f0f', 10)
+					FD.drawPoint(new Vector(point.inputs.value[0][0], point.inputs.value[1][0]), point.outputs.value[0][0] > .5 ? '#f0f' : '#0f0', 10)
 				}
 
 				errorHolder.innerHTML = 'Error: ' + calcError() + ' dT: ' + (new Date() - start) + 'ms';
@@ -187,8 +188,8 @@
 			// f = (x, y) => Math.sin(x * Math.PI * 5) / 4 + .5 > y;
 		
 
-			// let f = (x, y) => NN.calcOutput(new Matrix().fromArray([[x], [y]])).value[0][0] > .5;
-			let f = (x, y) => NN.calcOutput(new Matrix().fromArray([[x]])).value[0][0] > y;
+			let f = (x, y) => NN.calcOutput(new Matrix().fromArray([[x], [y]])).value[0][0] > .5;
+			// let f = (x, y) => NN.calcOutput(new Matrix().fromArray([[x]])).value[0][0] > y;
 
 
 
@@ -202,15 +203,15 @@
 
 			graph.onclick = function(_e) {
 				let pos = FD.pxToPos(new Vector(_e.clientX / graph.offsetWidth * graph.width, _e.clientY / graph.offsetHeight * graph.height));
-				// let dataPoint = {
-				// 	inputs: new Matrix().fromArray([pos.value]).transpose(),
-				// 	outputs: new Matrix().fromArray([[_e.shiftKey ? 0 : 1]])
-				// }
-
 				let dataPoint = {
-					inputs: new Matrix().fromArray([[pos.value[0]]]),
-					outputs: new Matrix().fromArray([[pos.value[1]]])
+					inputs: new Matrix().fromArray([pos.value]).transpose(),
+					outputs: new Matrix().fromArray([[_e.shiftKey ? 0 : 1]])
 				}
+
+				// let dataPoint = {
+				// 	inputs: new Matrix().fromArray([[pos.value[0]]]),
+				// 	outputs: new Matrix().fromArray([[pos.value[1]]])
+				// }
 				dataPoints.push(dataPoint);
 			}
 			

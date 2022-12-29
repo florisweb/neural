@@ -20,7 +20,7 @@ class NeuralNetwork {
 	}
 
 	calcChanges(_input, _targetOutput) {
-		const learningRate = .1;
+		const learningRate = .5;
 
 		let output = this.calcOutput(_input);
 		let errors = output.copy().add(_targetOutput.copy().scale(-1)).applyFunction((v) => v**2);
