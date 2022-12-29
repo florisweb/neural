@@ -14,12 +14,19 @@ class Matrix {
 		}
 	}
 	setFromMatrix(_matrix) {
-		this.value = Object.assign([], _matrix.value);
-		return this;
+		return this.fromArray(_matrix.value);
 	}
 
 	fromArray(_array) {
-		this.value = Object.assign([], _array);
+		this.value = [];
+		for (let y = 0; y < _array.length; y++)
+		{	
+			this.value[y] = [];
+			for (let x = 0; x < _array[0].length; x++)
+			{
+				this.value[y][x] = _array[y][x];
+			}
+		}
 		return this;
 	}
 
